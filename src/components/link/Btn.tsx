@@ -9,7 +9,7 @@ import { Text } from '../Themed';
 type LinkBtnProps = {
   children?: React.ReactNode | React.ReactNode[];
   style?: TextStyle;
-  href: string;
+  to: string;
   color?: 'enter';
 };
 
@@ -18,6 +18,7 @@ export const LinkBtn = ({ children, style, color, ...props }: LinkBtnProps) => {
 
   return (
     <Link
+      href={props.to}
       style={[
         styles(theme).link,
         style,

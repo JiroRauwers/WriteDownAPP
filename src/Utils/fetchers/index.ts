@@ -1,3 +1,4 @@
+import { BackResponse } from 'src/types/backResponse';
 import { HTTPResponseError } from 'src/types/errors';
 
 export const fetcher = <T extends unknown>(
@@ -34,5 +35,5 @@ export const FetchBackEnd = <T>(
   else options.body = JSON.stringify(params);
 
   console.log('url', BackUrl, 'options', options);
-  return fetcher<T>(BackUrl, options);
+  return fetcher<BackResponse<T>>(BackUrl, options);
 };

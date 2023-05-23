@@ -1,18 +1,19 @@
 import { StyleSheet } from 'react-native';
 
-import { Btn } from 'src/components/button/Btn';
-import { LinkBtn } from 'src/components/link/Btn';
 import { Text, View } from 'src/components/Themed';
 import { useAuth } from 'src/context/auth';
+import { useNotes } from 'src/Hooks/useNotes';
 
 export default function TabOneScreen() {
   const { user, SignOut } = useAuth();
+  const [notes] = useNotes();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>user : {user?.name}</Text>
-      <LinkBtn to="/Notes">Notes</LinkBtn>
-      <Btn onPress={SignOut}>Sign Out</Btn>
+      <Text style={styles.title}>Notes </Text>
+      {notes.map((note, i) => (
+        <Text key={i}>{note.title}</Text>
+      ))}
     </View>
   );
 }
