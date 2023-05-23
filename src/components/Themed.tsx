@@ -11,11 +11,14 @@ import {
 
 import Colors from '../constants/Colors';
 
-export function useThemeColor(
-  props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
-) {
-  const theme = useColorScheme() ?? 'light';
+export const useThemeColor = (
+  props: Partial<Record<keyof typeof Colors, string>>,
+  colorName: keyof typeof Colors.Latte &
+    keyof typeof Colors.Frappe &
+    keyof typeof Colors.Macchiato &
+    keyof typeof Colors.Mocha
+) => {
+  const theme = useColorScheme() === 'dark' ? 'Mocha' : 'Latte';
   const colorFromProps = props[theme];
 
   if (colorFromProps) {
@@ -23,7 +26,7 @@ export function useThemeColor(
   } else {
     return Colors[theme][colorName];
   }
-}
+};
 
 type ThemeProps = {
   lightColor?: string;
@@ -35,7 +38,7 @@ export type ViewProps = ThemeProps & DefaultView['props'];
 
 export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const color = useThemeColor({ Latte: lightColor, Mocha: darkColor }, 'text');
 
   return <DefaultText style={[{ color }, style]} {...otherProps} />;
 }
@@ -43,8 +46,8 @@ export function Text(props: TextProps) {
 export function View(props: ViewProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const backgroundColor = useThemeColor(
-    { light: lightColor, dark: darkColor },
-    'background'
+    { Latte: lightColor, Mocha: darkColor },
+    'base'
   );
 
   return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;

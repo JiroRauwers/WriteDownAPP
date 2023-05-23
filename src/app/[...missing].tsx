@@ -4,13 +4,15 @@ import { Link, Stack } from 'expo-router';
 import { Text, View } from 'src/components/Themed';
 
 export default function NotFoundScreen() {
+  console.log('route', window.location);
+
   return (
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />
       <View style={styles.container}>
         <Text style={styles.title}>This screen doesn&apos;t exist.</Text>
 
-        <Link href="/" style={styles.link}>
+        <Link href="/Login" style={styles.link}>
           <Text style={styles.linkText}>Go to home screen!</Text>
         </Link>
       </View>
