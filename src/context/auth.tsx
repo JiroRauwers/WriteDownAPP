@@ -31,9 +31,8 @@ const useProtectedRoute = (user: User | null) => {
   useEffect(() => {
     console.log('auth', segments);
     console.log('auth user:', user);
-    const inAuthGroup = segments[0] === '(Auth)';
 
-    if (!user && inAuthGroup) router.replace('/');
+    if (!user) router.replace('/');
   }, [user, segments]);
 };
 
