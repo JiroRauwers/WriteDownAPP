@@ -11,9 +11,6 @@ const Welcome = () => {
   const theme = useTheme();
 
   const [isModalVisible, setModalVisible] = useState(false);
-  const [selectedModal, setSelectedModal] = useState<'login' | 'signup'>(
-    'login'
-  );
 
   return (
     <View style={styles(theme).container}>

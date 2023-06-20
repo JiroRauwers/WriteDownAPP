@@ -2,22 +2,30 @@ import React, { ReactNode, useEffect } from 'react';
 
 import { useRouter, useSegments } from 'expo-router';
 import { User } from 'src/types/user';
-import { GetUserLogin } from 'src/Utils/fetchers/BackEnd';
+import { GETUserLogin, POSTNewUser } from 'src/Utils/fetchers/BackEnd';
+
+type SignInProps = {
+  Email: string;
+  Password: string;
+  Name: string;
+  Phone: string;
+};
 
 type AuthContextType = {
-  SignIn: (email: string, password: string) => void;
+  Login: (email: string, password: string) => void;
+  SignIn: ({ Email, Name, Password, Phone }: SignInProps) => void;
   SignOut: () => void;
   user: User | null;
 };
 
+const notLoaddedFn = (...args: unknown[]) =>
+  console.log('Not Loaded, passed args', args);
+
 const AuthContext = React.createContext<AuthContextType>({
-  SignIn: (email: string, password: string) => {
-    console.log('Not Loaded');
-  },
-  SignOut: () => {
-    console.log('Not Loaded');
-  },
-  user: null
+  Login   : notLoaddedFn,
+  SignIn  : notLoaddedFn,
+  SignOut : notLoaddedFn,
+  user    : null
 });
 
 export const useAuth = () => {
@@ -33,6 +41,7 @@ const useProtectedRoute = (user: User | null) => {
     console.log('auth user:', user);
 
     if (!user) router.replace('/');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, segments]);
 };
 
@@ -45,12 +54,12 @@ export const AuthProvider = ({
 
   useProtectedRoute(user);
 
-  const SignIn = async (email: string, password: string) => {
+  const Login = async (email: string, password: string) => {
     try {
       if (!email && !password)
         throw new Error('Email and Password are required');
 
-      const { isSuccessTypeResult, data: user } = await GetUserLogin(
+      const { isSuccessTypeResult, data: user } = await GETUserLogin(
         email,
         password
       );
@@ -62,9 +71,33 @@ export const AuthProvider = ({
     }
   };
 
+  const SignIn = async ({ Email, Name, Password, Phone }: SignInProps) => {
+    try {
+      if (!Email && !Password)
+        throw new Error('Email and Password are required');
+
+      const { isSuccessTypeResult: Register } = await POSTNewUser({
+        Email,
+        Password,
+        Name,
+        Phone
+      });
+      if (!Register) return;
+      const { isSuccessTypeResult: Logged, data: user } = await GETUserLogin(
+        Email,
+        Password
+      );
+      if (!Logged) throw new Error('User not logged In');
+      setAuth(user);
+    } catch (error) {
+      console.log('some error', error);
+      setAuth(null);
+    }
+  };
+
   return (
     <AuthContext.Provider
-      value={{ SignIn, SignOut: () => setAuth(null), user }}
+      value={{ SignIn, Login, SignOut: () => setAuth(null), user }}
     >
       {children}
     </AuthContext.Provider>

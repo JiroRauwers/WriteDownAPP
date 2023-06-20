@@ -23,8 +23,8 @@ export const Btn = ({ children, style, color, ...props }: LinkBtnProps) => {
   return (
     <TouchableOpacity
       style={[
-        style,
         styles(theme).touch,
+        style,
         color === 'enter' && styles(theme).enter
       ]}
       {...props}

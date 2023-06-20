@@ -1,14 +1,38 @@
 import { BackResponse } from 'src/types/backResponse';
 import { HTTPResponseError } from 'src/types/errors';
 
-export const fetcher = <T extends unknown>(
-  input: RequestInfo | URL | undefined,
+type HttpRes = {
+  messages: string[];
+  resultType: number;
+  exception: unknown;
+  isSuccessTypeResult: boolean;
+};
+
+class APIERROR extends Error {
+  constructor(message: string, err: HttpRes) {
+    super(message);
+    this.name = 'APIERROR';
+    this.stack = JSON.stringify(err.exception);
+    this.cause = err.messages[0];
+  }
+}
+
+export const fetcher = <T extends HttpRes>(
+  input: RequestInfo | URL,
   init?: RequestInit
 ): Promise<T> =>
-    fetch(input!, init)
-      .then((res) => res.json() as T)
+    fetch(input, init)
+      .then((res) => res.json() as unknown as T)
+      .then((res) => {
+        if (!res.isSuccessTypeResult) {
+          console.error('Res error', res);
+          throw new APIERROR('err', res);
+        }
+        return res;
+      })
       .catch((err) => {
-        console.error('| FETCH ERROR |', input, err);
+        console.error('| FETCH ERROR |', input, '\nerr:', err);
+        console.log('init', init);
         throw new HTTPResponseError(err.message, err.status);
       });
 
@@ -21,7 +45,7 @@ export const FetchBackEnd = <T>(
     `https://writedownonlineapi.up.railway.app/api${url}`
   );
 
-  const options: RequestInit = {
+  const options: RequestInit & { headers: Record<string, string> } = {
     method,
     headers: {
       accept: '*/*'
@@ -32,8 +56,11 @@ export const FetchBackEnd = <T>(
     Object.entries(params).map(([key, val]) =>
       BackUrl.searchParams.append(key, val.toString())
     );
-  else options.body = JSON.stringify(params);
+  else {
+    options.headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(params);
+  }
 
-  console.log('url', BackUrl, 'options', options);
+  console.log('FetchBackEnd >> ', '\nurl', BackUrl, '\noptions', options);
   return fetcher<BackResponse<T>>(BackUrl, options);
 };
