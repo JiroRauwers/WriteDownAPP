@@ -37,9 +37,6 @@ const useProtectedRoute = (user: User | null) => {
   const router = useRouter();
 
   useEffect(() => {
-    console.log('auth', segments);
-    console.log('auth user:', user);
-
     if (!user) router.replace('/');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, segments]);
@@ -66,7 +63,7 @@ export const AuthProvider = ({
 
       if (isSuccessTypeResult) setAuth(user);
     } catch (error) {
-      console.log('some error', error);
+      console.error('some error', error);
       setAuth(null);
     }
   };
@@ -90,7 +87,7 @@ export const AuthProvider = ({
       if (!Logged) throw new Error('User not logged In');
       setAuth(user);
     } catch (error) {
-      console.log('some error', error);
+      console.error('some error', error);
       setAuth(null);
     }
   };

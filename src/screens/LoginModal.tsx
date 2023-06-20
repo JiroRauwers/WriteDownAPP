@@ -152,7 +152,7 @@ export const LoginModal = ({ handleClose, visible }: ParentModalProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (user) router.replace('/User');
+    if (user) router.replace('/Notes');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 

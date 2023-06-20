@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useNavigation } from 'expo-router';
+import { useNavigation, useSearchParams } from 'expo-router';
 import BackIcon from 'src/components/icons/back';
 import { View } from 'src/components/Themed';
 import { useNotes } from 'src/Hooks/useNotes';
@@ -15,67 +15,49 @@ import { useToggle } from 'src/Hooks/useToggle';
 import { Theme, useTheme } from 'src/Utils/useTheme';
 
 const NewNote = () => {
-  const { notes, CreateNote } = useNotes();
+  const { NoteId } = useSearchParams();
+
+  const { UpdateNote, getSelectedNote, notes } = useNotes(Number(NoteId));
   const theme = useTheme();
-  const [NoteTitle, setNoteTitle] = useState(`New Note ${notes.length || ''}`);
+  const [NoteTitle, setNoteTitle] = useState(`Loading`);
   const [NoteText, setNoteText] = useState('');
-  const [FirstClick, toggleFClick] = useToggle(true);
+  const [loading, , setIfLoading] = useToggle(true);
   const nav = useNavigation();
 
-  const goBack = () => {
+  useEffect(() => {
+    console.log('Loadded notes >>>', notes);
+    getSelectedNote().then((res) => {
+      if (!res) return console.log('Note not found');
+      console.log('Note >> ', res);
+      setIfLoading(false);
+      setNoteTitle(res.title);
+      setNoteText(res.content);
+      console.info('Note Loaded');
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const goBack = async () => {
     if (!nav.canGoBack())
       throw new Error('NewNote.tsx: goBack: Cannot go back');
+
+    if (loading) nav.goBack();
     /* === To Do
      * 1. Check if NoteTitle is empty
      * 2. If empty, delete note
      * 3. If not empty, save note
      * 4. Go back
      */
-    if (!NoteTitle) throw new Error('NewNote.tsx: goBack: NoteTitle is empty');
-    if (!NoteText) nav.goBack();
-    if (NoteText)
-      CreateNote({ Text: NoteText, Title: NoteTitle }).then(nav.goBack);
-
-    nav.goBack();
+    if (NoteText) {
+      await UpdateNote({
+        content : NoteText,
+        title   : NoteTitle,
+        tags    : ''
+      }).then(nav.goBack);
+      console.log('Note Updated');
+    }
   };
-
-  const baseStyle = StyleSheet.create({
-    baseText: {
-      color: theme.text
-    }
-  });
-
-  const mdStyles = StyleSheet.create({
-    body: {
-      ...baseStyle.baseText
-    },
-    heading1: {
-      fontSize: 32,
-      ...baseStyle.baseText
-    },
-    heading2: {
-      fontSize: 24,
-      ...baseStyle.baseText
-    },
-    heading3: {
-      fontSize: 18,
-      ...baseStyle.baseText
-    },
-    heading4: {
-      fontSize: 16,
-      ...baseStyle.baseText
-    },
-    heading5: {
-      fontSize: 13,
-      ...baseStyle.baseText
-    },
-    heading6: {
-      fontSize: 11,
-      ...baseStyle.baseText
-    }
-  });
-
-  // const markdownItInstance = MarkdownIt({ typographer: true });
 
   return (
     <View style={styles(theme).Container}>
@@ -86,13 +68,6 @@ const NewNote = () => {
         <TextInput
           placeholderTextColor={theme.text}
           style={[styles(theme).NoteTitle]}
-          onFocus={() => {
-            if (FirstClick) {
-              console.log('First CLiCK');
-              setNoteTitle('');
-              toggleFClick();
-            }
-          }}
           onChangeText={setNoteTitle}
           value={NoteTitle}
         />
@@ -103,24 +78,14 @@ const NewNote = () => {
             contentInsetAdjustmentBehavior="automatic"
             style={{ height: '100%' }}
           >
-            {/* <MarkdownEditor
-              styles={{ color: 'blue' }}
-              onMarkdownChange={setNoteText}
-              markdown={NoteText}
-            /> */}
-            <TextInput
-              style={[styles(theme).NoteTextField]}
-              multiline
-              value={NoteText}
-              onChangeText={setNoteText}
-            />
-            {/* <Markdown
-              mergeStyle={false}
-              markdownit={markdownItInstance}
-              style={mdStyles}
-            >
-              {NoteText}
-            </Markdown> */}
+            {!loading && (
+              <TextInput
+                style={[styles(theme).NoteTextField]}
+                multiline
+                value={NoteText}
+                onChangeText={setNoteText}
+              />
+            )}
           </ScrollView>
         </SafeAreaView>
       </View>

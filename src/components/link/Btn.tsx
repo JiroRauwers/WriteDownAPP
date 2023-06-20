@@ -28,6 +28,7 @@ export const LinkBtn = ({ children, style, color, ...props }: LinkBtnProps) => {
     >
       <Text
         style={[
+          { color: style?.color || theme.text },
           styles(theme).text,
           color === 'enter' && styles(theme).enterText
         ]}

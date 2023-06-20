@@ -61,6 +61,5 @@ export const FetchBackEnd = <T>(
     options.body = JSON.stringify(params);
   }
 
-  console.log('FetchBackEnd >> ', '\nurl', BackUrl, '\noptions', options);
   return fetcher<BackResponse<T>>(BackUrl, options);
 };
