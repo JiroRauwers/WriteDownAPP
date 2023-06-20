@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity
+} from 'react-native';
+import Markdown, { MarkdownIt } from 'react-native-markdown-display';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useNavigation } from 'expo-router';
 import BackIcon from 'src/components/icons/back';
@@ -28,6 +35,45 @@ const NewNote = () => {
 
     nav.goBack();
   };
+
+  const baseStyle = StyleSheet.create({
+    baseText: {
+      color: theme.text
+    }
+  });
+
+  const mdStyles = StyleSheet.create({
+    body: {
+      ...baseStyle.baseText
+    },
+    heading1: {
+      fontSize: 32,
+      ...baseStyle.baseText
+    },
+    heading2: {
+      fontSize: 24,
+      ...baseStyle.baseText
+    },
+    heading3: {
+      fontSize: 18,
+      ...baseStyle.baseText
+    },
+    heading4: {
+      fontSize: 16,
+      ...baseStyle.baseText
+    },
+    heading5: {
+      fontSize: 13,
+      ...baseStyle.baseText
+    },
+    heading6: {
+      fontSize: 11,
+      ...baseStyle.baseText
+    }
+  });
+
+  const markdownItInstance = MarkdownIt({ typographer: true });
+
   return (
     <View style={styles(theme).Container}>
       <View style={styles(theme).TopNav}>
@@ -49,12 +95,26 @@ const NewNote = () => {
         />
       </View>
       <View style={styles(theme).Page}>
-        <TextInput
-          style={[styles(theme).NoteTextField]}
-          multiline
-          value={NoteText}
-          onChangeText={setNoteText}
-        />
+        <SafeAreaView>
+          <TextInput
+            style={[styles(theme).NoteTextField]}
+            multiline
+            value={NoteText}
+            onChangeText={setNoteText}
+          />
+          <ScrollView
+            contentInsetAdjustmentBehavior="automatic"
+            style={{ height: '100%' }}
+          >
+            <Markdown
+              mergeStyle={false}
+              markdownit={markdownItInstance}
+              style={mdStyles}
+            >
+              {NoteText}
+            </Markdown>
+          </ScrollView>
+        </SafeAreaView>
       </View>
     </View>
   );
